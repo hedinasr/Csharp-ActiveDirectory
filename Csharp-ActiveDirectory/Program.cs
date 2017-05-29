@@ -14,8 +14,10 @@ namespace Csharp_ActiveDirectory
             string invokeVerb = string.Empty;
             object invokeVerbInstance = null;
 
-            // Contient toutes les numéros des classes
+            // Contient les numéros des classes
             HashSet<string> classes = new HashSet<string>();
+            List<string[]> students = null;
+            List<string[]> professors = null;
 
             var options = new Options();
             if (!CommandLine.Parser.Default.ParseArgumentsStrict(args, options,
@@ -32,13 +34,96 @@ namespace Csharp_ActiveDirectory
             if (invokeVerb == "students")
             {
                 var subOptions = (StudentsSubOptions)invokeVerbInstance;
-                Console.WriteLine("Création des étudiants");
+                ActiveDirectory activeDirectory = new ActiveDirectory(subOptions.Username, subOptions.Password);
+
+                try
+                {
+                    students = ReadCSV(subOptions.File);
+                }
+                catch (Exception Ex)
+                {
+                    Console.WriteLine(Ex.Message);
+                }
+
+                if (subOptions.Create)
+                {
+                    Console.WriteLine("Création des étudiants");
+
+                    if (!activeDirectory.IsGroupExisting("Élèves"))
+                    {
+                        // Création du groupe Élèves
+                        activeDirectory.CreateNewGroup("Élèves", "Groupe élèves", true);
+                    }
+
+                    foreach (var student in students)
+                    {
+                        // On construit l'utilisateur à partir du CSV
+                        var id = student[0];
+                        var surname = student[1];
+                        var givenName = student[2];
+                        var birthday = student[3];
+                        var classe = student[4];
+                        var username = ConstructUsername(givenName, surname);
+
+                        classes.Add(classe);
+
+                        // On créer l'utilisateur s'il n'existe pas déjà
+                        activeDirectory.CreateUser(username, "SRIVéà&è", givenName, surname, id);
+
+                        // On le rajoute au groupe
+                        try
+                        {
+                            activeDirectory.AddUserToGroup(username, "Élèves");
+                        }
+                        catch (Exception Ex)
+                        {
+                            Console.WriteLine(Ex.Message);
+                        }
+                    }
+                }
+
+                if (subOptions.Delete)
+                {
+                    Console.WriteLine("Suppression des étudiants");
+
+                    students.ForEach(x => activeDirectory.DeleteUser(ConstructUsername(x[2], x[1])));
+                }
             }
 
             if (invokeVerb == "professors")
             {
                 var subOptions = (ProfessorsSubOptions)invokeVerbInstance;
-                Console.WriteLine("Création des professeurs");
+                ActiveDirectory activeDirectory = new ActiveDirectory(subOptions.Username, subOptions.Password);
+
+                try
+                {
+                    professors = ReadCSV(subOptions.File);
+                }
+                catch (Exception Ex)
+                {
+                    Console.WriteLine(Ex.Message);
+                }
+
+                if (subOptions.Create)
+                {
+                    Console.WriteLine("Création des professeurs");
+
+                    if (!activeDirectory.IsGroupExisting("Professeurs"))
+                    {
+                        // Création du groupe Professeurs
+                        activeDirectory.CreateNewGroup("Professeurs", "Groupe professeurs", true);
+                    }
+                }
+
+                if (subOptions.Delete)
+                {
+                    Console.WriteLine("Suppression des professeurs");
+                }
+            }
+
+            if (((CommonSubOptions)invokeVerbInstance).CreateDirectories)
+            {
+                Console.WriteLine("Création des dossiers");
             }
         }
 

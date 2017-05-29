@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csharp-ActiveDirectory", "Csharp-ActiveDirectory\Csharp-ActiveDirectory.csproj", "{477913F4-EFCD-46BB-9396-001D185ED3F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csharp-ActiveDirectoryTests", "Csharp-ActiveDirectoryTests\Csharp-ActiveDirectoryTests.csproj", "{BC38345F-4317-4F9B-88ED-28D964A14407}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{477913F4-EFCD-46BB-9396-001D185ED3F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{477913F4-EFCD-46BB-9396-001D185ED3F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{477913F4-EFCD-46BB-9396-001D185ED3F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC38345F-4317-4F9B-88ED-28D964A14407}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC38345F-4317-4F9B-88ED-28D964A14407}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC38345F-4317-4F9B-88ED-28D964A14407}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC38345F-4317-4F9B-88ED-28D964A14407}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
