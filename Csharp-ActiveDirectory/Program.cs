@@ -113,11 +113,31 @@ namespace Csharp_ActiveDirectory
                         // Création du groupe Professeurs
                         activeDirectory.CreateNewGroup("Professeurs", "Groupe professeurs", true);
                     }
+
+                    foreach (var prof in professors)
+                    {
+                        var surname = prof[0];
+                        var givenName = prof[1];
+                        var username = ConstructUsername(givenName, surname);
+
+                        activeDirectory.CreateUser(username, "SRIVéà&è", givenName, surname, null);
+
+                        try
+                        {
+                            activeDirectory.AddUserToGroup(username, "Professeurs");
+                        }
+                        catch (Exception Ex)
+                        {
+                            Console.WriteLine(Ex.Message);
+                        }
+                    }
                 }
 
                 if (subOptions.Delete)
                 {
                     Console.WriteLine("Suppression des professeurs");
+
+                    professors.ForEach(x => activeDirectory.DeleteUser(ConstructUsername(x[1], x[0])));
                 }
             }
 
