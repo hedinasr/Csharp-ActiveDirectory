@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.AccessControl;
 
 namespace Csharp_ActiveDirectory
 {
@@ -144,6 +146,68 @@ namespace Csharp_ActiveDirectory
             if (((CommonSubOptions)invokeVerbInstance).CreateDirectories)
             {
                 Console.WriteLine("Création des dossiers");
+
+                var year = "2016-2017";
+                var subOptions = (CommonSubOptions)invokeVerbInstance;
+
+                Directory.CreateDirectory("c:\\" + year); // Création du dossier principal
+                // TODO mettre ce dossier dans un dossier partagé (pas de c:)
+
+                // Droits d'accès pour le dossier <année>/<classe>/public
+                DirectorySecurity secRules = new DirectorySecurity();
+
+                secRules.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Professeurs", FileSystemRights.WriteData, AccessControlType.Allow));
+                secRules.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Élèves", FileSystemRights.WriteData, AccessControlType.Allow));
+                secRules.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Administrateur", FileSystemRights.FullControl, AccessControlType.Allow));
+                
+                foreach (var classe in classes)
+                {
+                    Directory.CreateDirectory("c:\\" + year + "\\" + classe);
+                    Directory.CreateDirectory("c:\\" + year + "\\" + classe + "\\public", secRules);
+                }
+
+                foreach (var student in students)
+                {
+                    // Droit d'accès pour les dossiers des élèves
+                    DirectorySecurity secRules2 = new DirectorySecurity();
+
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Administrateur", FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Professeurs", FileSystemRights.Read, AccessControlType.Allow));
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\" + ConstructUsername(student[2], student[1]), FileSystemRights.FullControl, AccessControlType.Allow));
+
+                    // Dossier par élève par classe
+                    Directory.CreateDirectory("c:\\" + year + "\\" + student[4] + "\\" + ConstructUsername(student[2], student[1]), secRules2);
+
+                    // Dossier par élève
+                    Directory.CreateDirectory("c:\\élève\\" + ConstructUsername(student[2], student[1]), secRules);
+                }
+
+                foreach (var prof in professors)
+                {
+                    var username = ConstructUsername(prof[1], prof[0]);
+
+                    // dossier public
+                    DirectorySecurity secRules2 = new DirectorySecurity();
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\" + username, FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Administrateur", FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Professeurs", FileSystemRights.Read, AccessControlType.Allow));
+                    secRules2.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Élèves", FileSystemRights.Read, AccessControlType.Allow));
+                    Directory.CreateDirectory(@"c:\\professeurs\\" + username + "\\public", secRules2);
+
+                    // dossier dépôt
+                    DirectorySecurity secRules3 = new DirectorySecurity();
+                    secRules3.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\" + username, FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules3.AddAccessRule(new FileSystemAccessRule(@"ananasr.local\Administrateur", FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules3.AddAccessRule(new FileSystemAccessRule(@"ananasr.local\Professeurs", FileSystemRights.WriteData, AccessControlType.Allow));
+                    secRules3.AddAccessRule(new FileSystemAccessRule(@"ananasr.local\Élèves", FileSystemRights.WriteData, AccessControlType.Allow));
+                    Directory.CreateDirectory(@"c:\\professeurs\\" + username + "\\dépôt", secRules3);
+
+                    // dossier perso
+                    DirectorySecurity secRules4 = new DirectorySecurity();
+                    secRules4.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\" + username, FileSystemRights.FullControl, AccessControlType.Allow));
+                    secRules4.AddAccessRule(new FileSystemAccessRule(@subOptions.Domain + "\\Administrateur", FileSystemRights.FullControl, AccessControlType.Allow));
+                    Directory.CreateDirectory(@"c:\\professeurs\" + username, secRules4);
+                }
             }
         }
 
